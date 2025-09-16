@@ -25,10 +25,11 @@ export enum UserStatus {
 export class User extends EntityHelper {
   @PrimaryGeneratedColumn({ name: "id_usuario" })
   id: number;
-
+  //Debería usar varchar o type: String?
   @Column({ type: String, unique: true, nullable: true, name: "email" })
   email: string | null;
 
+  //Debería usar varchar o type: String? Probando con lo dos para ver una diferencia
   @Column({ name: "contrasena", type: "varchar", length: 255, nullable: true })
   @Exclude({ toPlainOnly: true })
   password: string;
