@@ -8,28 +8,28 @@ import {
   UpdateDateColumn,
   BeforeInsert,
   BeforeUpdate,
-} from 'typeorm';
+} from "typeorm";
 
-import { EntityHelper } from 'src/utils/entity-helper';
+import { EntityHelper } from "src/utils/entity-helper";
 
-import { Exclude } from 'class-transformer';
-import { AuthProvidersEnum } from 'src/auth/enums/auth-providers.enum';
-import { hashPassword } from 'src/utils/helpers';
+import { Exclude } from "class-transformer";
+import { AuthProvidersEnum } from "src/auth/enums/auth-providers.enum";
+import { hashPassword } from "src/utils/helpers";
 
 export enum UserStatus {
-  Active = 'active',
-  Inactive = 'inactive',
+  Active = "active",
+  Inactive = "inactive",
 }
 
-@Entity()
+@Entity("usuario")
 export class User extends EntityHelper {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn("increment", { name: "id_usuario" })
   id: number;
 
-  @Column({ type: String, unique: true, nullable: true })
+  @Column({ type: String, unique: true, nullable: true, name: "email" })
   email: string | null;
 
-  @Column({ nullable: true })
+  @Column({ name: "contrasena", nullable: true })
   @Exclude({ toPlainOnly: true })
   password: string;
 
@@ -52,7 +52,7 @@ export class User extends EntityHelper {
   @Column({ default: AuthProvidersEnum.email })
   provider: string;
 
-  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.Inactive })
+  @Column({ type: "enum", enum: UserStatus, default: UserStatus.Inactive })
   status: UserStatus;
 
   @Index()
