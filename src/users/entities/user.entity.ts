@@ -23,13 +23,14 @@ export enum UserStatus {
 
 @Entity("usuario")
 export class User extends EntityHelper {
-  @PrimaryGeneratedColumn("increment", { name: "id_usuario" })
+  @PrimaryGeneratedColumn({ name: "id_usuario" })
   id: number;
-
+  //Debería usar varchar o type: String?
   @Column({ type: String, unique: true, nullable: true, name: "email" })
   email: string | null;
 
-  @Column({ name: "contrasena", nullable: true })
+  //Debería usar varchar o type: String? Probando con lo dos para ver una diferencia
+  @Column({ name: "contrasena", type: "varchar", length: 255, nullable: true })
   @Exclude({ toPlainOnly: true })
   password: string;
 
@@ -49,8 +50,21 @@ export class User extends EntityHelper {
     }
   }
 
-  @Column({ default: AuthProvidersEnum.email })
+  @Column({
+    name: "provider",
+    type: "enum",
+    enum: AuthProvidersEnum,
+    default: AuthProvidersEnum.email,
+  })
   provider: string;
+
+  @Column({
+    name: "tipo_rol",
+    type: "enum",
+    enum: ["admin", "cliente", "empleado", "diseñador"],
+    default: "cliente",
+  })
+  role: string; // You can name this 'role' in code for clarity
 
   @Column({ type: "enum", enum: UserStatus, default: UserStatus.Inactive })
   status: UserStatus;
