@@ -23,13 +23,14 @@ export enum UserStatus {
 
 @Entity("usuario")
 export class User extends EntityHelper {
-  @PrimaryGeneratedColumn("increment", { name: "id_usuario" })
+  @PrimaryGeneratedColumn({ name: "id_usuario" })
   id: number;
+
 
   @Column({ type: String, unique: true, nullable: false, name: "email" })
   email: string;
 
-  @Column({ name: "contrasena", nullable: false })
+  @Column({ name: "contrasena", type: "varchar", length: 255, nullable: false })
   @Exclude({ toPlainOnly: true })
   password: string;
 
@@ -56,6 +57,14 @@ export class User extends EntityHelper {
     default: AuthProvidersEnum.email,
   })
   provider: string;
+
+  @Column({
+    name: "tipo_rol",
+    type: "enum",
+    enum: ["admin", "cliente", "empleado", "diseñador"],
+    default: "cliente",
+  })
+  role: string; // You can name this 'role' in code for clarity
 
   @Column({ type: "enum", enum: UserStatus, default: UserStatus.Inactive })
   status: UserStatus;
