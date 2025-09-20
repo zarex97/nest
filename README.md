@@ -30,7 +30,16 @@ git clone  https://github.com/RamezTaher/nestjs-full-auth
 cd nestjs-full-auth
 npm install
 cp env-example .env
+
+[1st Way]
+npm run dev
+
+OR
+
+[2nd Way]
 npm run start:dev
+npm run maildev
+
 ```
 
 ## Links
