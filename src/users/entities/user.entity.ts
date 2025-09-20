@@ -26,7 +26,6 @@ export class User extends EntityHelper {
   @PrimaryGeneratedColumn({ name: "id_usuario" })
   id: number;
 
-
   @Column({ type: String, unique: true, nullable: false, name: "email" })
   email: string;
 
@@ -85,14 +84,6 @@ export class User extends EntityHelper {
   @Index()
   @Column({ name: "apellido", type: "varchar", length: 100, nullable: false })
   lastName: string | null;
-
-  @Column({
-    name: "tipo_rol",
-    type: "enum",
-    enum: ["admin", "cliente", "empleado", "diseñador"],
-    default: "cliente",
-  })
-  role: string;
 
   @Column({ name: "ultimo_acceso", type: "datetime", nullable: true })
   lastLoginAt: Date;
