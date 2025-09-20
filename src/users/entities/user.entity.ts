@@ -85,12 +85,13 @@ export class User extends EntityHelper {
   @Column({ name: "apellido", type: "varchar", length: 100, nullable: false })
   lastName: string | null;
 
+  //Podría ser cambiado a un string para incluir simbolos como el "+" o el "-"
   @Column({
     name: "numero_telefono",
     type: "integer",
     nullable: false,
   })
-  phone: string;
+  phone: Number;
 
   @Column({ name: "ultimo_acceso", type: "datetime", nullable: true })
   lastLoginAt: Date;
