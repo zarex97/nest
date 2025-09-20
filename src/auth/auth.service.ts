@@ -43,8 +43,17 @@ export class AuthService implements IAuthService {
   ) {}
 
   async validateLogin(loginDto: AuthEmailLoginDto): Promise<LoginResponseType> {
+    console.log("🔍 Login email:", loginDto.email);
+    console.log("🔍 Query options:", { email: loginDto.email });
     const user = await this.usersService.findOneUser({
       email: loginDto.email,
+    });
+
+    console.log("🔍 User loaded:", {
+      id: user.id,
+      email: user.email,
+      role: user.role, // 👈 Log this
+      tipo_rol: user.role, // same thing
     });
 
     if (!user) {
