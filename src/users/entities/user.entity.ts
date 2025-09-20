@@ -25,12 +25,12 @@ export enum UserStatus {
 export class User extends EntityHelper {
   @PrimaryGeneratedColumn({ name: "id_usuario" })
   id: number;
-  //Debería usar varchar o type: String?
-  @Column({ type: String, unique: true, nullable: true, name: "email" })
-  email: string | null;
 
-  //Debería usar varchar o type: String? Probando con lo dos para ver una diferencia
-  @Column({ name: "contrasena", type: "varchar", length: 255, nullable: true })
+
+  @Column({ type: String, unique: true, nullable: false, name: "email" })
+  email: string;
+
+  @Column({ name: "contrasena", type: "varchar", length: 255, nullable: false })
   @Exclude({ toPlainOnly: true })
   password: string;
 
@@ -70,18 +70,38 @@ export class User extends EntityHelper {
   status: UserStatus;
 
   @Index()
-  @Column({ type: String, nullable: true })
+  @Column({
+    name: "numero_documento",
+    type: "varchar",
+    length: 11,
+    nullable: false,
+  })
   socialId: string | null;
 
   @Index()
-  @Column({ type: String, nullable: true })
+  @Column({ name: "nombre", type: "varchar", length: 100, nullable: false })
   firstName: string | null;
 
   @Index()
-  @Column({ type: String, nullable: true })
+  @Column({ name: "apellido", type: "varchar", length: 100, nullable: false })
   lastName: string | null;
 
-  @CreateDateColumn()
+  @Column({
+    name: "tipo_rol",
+    type: "enum",
+    enum: ["admin", "cliente", "empleado", "diseñador"],
+    default: "cliente",
+  })
+  role: string;
+
+  @Column({ name: "ultimo_acceso", type: "datetime", nullable: true })
+  lastLoginAt: Date;
+
+  @CreateDateColumn({
+    name: "fecha_creacion",
+    type: "datetime",
+    default: () => "CURRENT_TIMESTAMP",
+  })
   createdAt: Date;
 
   @Column({ type: String, nullable: true })
