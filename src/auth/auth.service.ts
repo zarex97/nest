@@ -4,30 +4,30 @@ import {
   Inject,
   Injectable,
   UnauthorizedException,
-} from '@nestjs/common';
-import { IUsersService } from 'src/users/users';
-import { Services } from 'src/utils/constants';
-import { AuthEmailLoginDto } from './dtos/auth-email-login.dto';
-import { LoginResponseType } from './types/login-response.type';
-import { AuthProvidersEnum } from './enums/auth-providers.enum';
-import crypto from 'crypto';
+} from "@nestjs/common";
+import { IUsersService } from "src/users/users";
+import { Services } from "src/utils/constants";
+import { AuthEmailLoginDto } from "./dtos/auth-email-login.dto";
+import { LoginResponseType } from "./types/login-response.type";
+import { AuthProvidersEnum } from "./enums/auth-providers.enum";
+import crypto from "crypto";
 
-import { User, UserStatus } from 'src/users/entities/user.entity';
-import { ISessionService } from 'src/session/session';
-import { Session } from 'src/session/entities/session.entity';
-import { ConfigService } from '@nestjs/config';
-import { AllConfigType } from 'src/config/config.type';
-import ms from 'ms';
-import { JwtService } from '@nestjs/jwt';
-import { IAuthService } from './auth';
-import { AuthRegisterDto } from './dtos/auth-register.dto';
-import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
-import { compareHash } from 'src/utils/helpers';
-import { IMailsService } from 'src/mails/mails';
-import { JwtPayloadType } from './strategies/types/jwt-payload.type';
-import { NullableType } from 'src/utils/types/nullable.type';
-import { IForgotPasswordService } from 'src/forgot-password/forgot-password';
-import { JwtRefreshPayloadType } from './strategies/types/jwt-refresh-payload.type';
+import { User, UserStatus } from "src/users/entities/user.entity";
+import { ISessionService } from "src/session/session";
+import { Session } from "src/session/entities/session.entity";
+import { ConfigService } from "@nestjs/config";
+import { AllConfigType } from "src/config/config.type";
+import ms from "ms";
+import { JwtService } from "@nestjs/jwt";
+import { IAuthService } from "./auth";
+import { AuthRegisterDto } from "./dtos/auth-register.dto";
+import { randomStringGenerator } from "@nestjs/common/utils/random-string-generator.util";
+import { compareHash } from "src/utils/helpers";
+import { IMailsService } from "src/mails/mails";
+import { JwtPayloadType } from "./strategies/types/jwt-payload.type";
+import { NullableType } from "src/utils/types/nullable.type";
+import { IForgotPasswordService } from "src/forgot-password/forgot-password";
+import { JwtRefreshPayloadType } from "./strategies/types/jwt-refresh-payload.type";
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -39,7 +39,7 @@ export class AuthService implements IAuthService {
     private readonly forgotPasswordService: IForgotPasswordService,
 
     private readonly configService: ConfigService<AllConfigType>,
-    private readonly jwtService: JwtService,
+    private readonly jwtService: JwtService
   ) {}
 
   async validateLogin(loginDto: AuthEmailLoginDto): Promise<LoginResponseType> {
@@ -52,10 +52,10 @@ export class AuthService implements IAuthService {
         {
           status: HttpStatus.UNPROCESSABLE_ENTITY,
           errors: {
-            email: 'notFound',
+            email: "notFound",
           },
         },
-        HttpStatus.UNPROCESSABLE_ENTITY,
+        HttpStatus.UNPROCESSABLE_ENTITY
       );
     }
 
@@ -67,7 +67,7 @@ export class AuthService implements IAuthService {
             email: `needLoginViaProvider:${user.provider}`,
           },
         },
-        HttpStatus.UNPROCESSABLE_ENTITY,
+        HttpStatus.UNPROCESSABLE_ENTITY
       );
     }
 
@@ -78,10 +78,10 @@ export class AuthService implements IAuthService {
         {
           status: HttpStatus.UNPROCESSABLE_ENTITY,
           errors: {
-            password: 'incorrectPassword',
+            password: "incorrectPassword",
           },
         },
-        HttpStatus.UNPROCESSABLE_ENTITY,
+        HttpStatus.UNPROCESSABLE_ENTITY
       );
     }
 
@@ -92,6 +92,7 @@ export class AuthService implements IAuthService {
     const { token, refreshToken, tokenExpires } = await this.getTokensData({
       id: user.id,
       sessionId: session.id,
+      role: user.role, // 👈 Pass the user's role
     });
 
     return {
@@ -104,9 +105,9 @@ export class AuthService implements IAuthService {
 
   async registerUser(registerDto: AuthRegisterDto): Promise<void> {
     const hash = crypto
-      .createHash('sha256')
+      .createHash("sha256")
       .update(randomStringGenerator())
-      .digest('hex');
+      .digest("hex");
 
     await this.usersService.createUser({
       ...registerDto,
@@ -141,7 +142,7 @@ export class AuthService implements IAuthService {
           status: HttpStatus.NOT_FOUND,
           error: `notFound`,
         },
-        HttpStatus.NOT_FOUND,
+        HttpStatus.NOT_FOUND
       );
     }
 
@@ -160,17 +161,17 @@ export class AuthService implements IAuthService {
         {
           status: HttpStatus.UNPROCESSABLE_ENTITY,
           errors: {
-            email: 'emailNotExists',
+            email: "emailNotExists",
           },
         },
-        HttpStatus.UNPROCESSABLE_ENTITY,
+        HttpStatus.UNPROCESSABLE_ENTITY
       );
     }
 
     const hash = crypto
-      .createHash('sha256')
+      .createHash("sha256")
       .update(randomStringGenerator())
-      .digest('hex');
+      .digest("hex");
     await this.forgotPasswordService.create({
       hash,
       user,
@@ -200,7 +201,7 @@ export class AuthService implements IAuthService {
             hash: `notFound`,
           },
         },
-        HttpStatus.UNPROCESSABLE_ENTITY,
+        HttpStatus.UNPROCESSABLE_ENTITY
       );
     }
 
@@ -217,8 +218,8 @@ export class AuthService implements IAuthService {
   }
 
   async refreshToken(
-    data: Pick<JwtRefreshPayloadType, 'sessionId'>,
-  ): Promise<Omit<LoginResponseType, 'user'>> {
+    data: Pick<JwtRefreshPayloadType, "sessionId">
+  ): Promise<Omit<LoginResponseType, "user">> {
     const session = await this.sessionService.findOne({
       where: {
         id: data.sessionId,
@@ -232,6 +233,7 @@ export class AuthService implements IAuthService {
     const { token, refreshToken, tokenExpires } = await this.getTokensData({
       id: session.user.id,
       sessionId: session.id,
+      role: session.user.role, // 👈 Include role here too
     });
 
     return {
@@ -241,23 +243,23 @@ export class AuthService implements IAuthService {
     };
   }
 
-  async logout(data: Pick<JwtRefreshPayloadType, 'sessionId'>) {
+  async logout(data: Pick<JwtRefreshPayloadType, "sessionId">) {
     return this.sessionService.softDelete({
       id: data.sessionId,
     });
   }
 
   private async getTokensData(data: {
-    id: User['id'];
-    sessionId: Session['id'];
+    id: User["id"];
+    sessionId: Session["id"];
+    role: string; // 👈 Add role here
   }) {
     const tokenExpiresIn = this.configService.getOrThrow<string>(
-      'auth.expires',
+      "auth.expires",
       {
         infer: true,
-      },
+      }
     );
-
     const tokenExpires = Date.now() + ms(tokenExpiresIn as any);
 
     const [token, refreshToken] = await Promise.all([
@@ -265,29 +267,30 @@ export class AuthService implements IAuthService {
         {
           id: data.id,
           sessionId: data.sessionId,
+          role: data.role, // 👈 Include role in JWT payload
         },
         {
-          secret: this.configService.getOrThrow<string>('auth.secret', {
+          secret: this.configService.getOrThrow<string>("auth.secret", {
             infer: true,
           }),
           expiresIn: tokenExpiresIn,
-        },
+        }
       ),
       await this.jwtService.signAsync(
         {
           sessionId: data.sessionId,
         },
         {
-          secret: this.configService.getOrThrow<string>('auth.refreshSecret', {
+          secret: this.configService.getOrThrow<string>("auth.refreshSecret", {
             infer: true,
           }),
           expiresIn: this.configService.getOrThrow<string>(
-            'auth.refreshExpires',
+            "auth.refreshExpires",
             {
               infer: true,
-            },
+            }
           ),
-        },
+        }
       ),
     ]);
 
