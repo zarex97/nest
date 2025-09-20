@@ -26,10 +26,10 @@ export class User extends EntityHelper {
   @PrimaryGeneratedColumn("increment", { name: "id_usuario" })
   id: number;
 
-  @Column({ type: String, unique: true, nullable: true, name: "email" })
-  email: string | null;
+  @Column({ type: String, unique: true, nullable: false, name: "email" })
+  email: string;
 
-  @Column({ name: "contrasena", nullable: true })
+  @Column({ name: "contrasena", nullable: false })
   @Exclude({ toPlainOnly: true })
   password: string;
 
@@ -49,25 +49,50 @@ export class User extends EntityHelper {
     }
   }
 
-  @Column({ default: AuthProvidersEnum.email })
+  @Column({
+    name: "provider",
+    type: "enum",
+    enum: AuthProvidersEnum,
+    default: AuthProvidersEnum.email,
+  })
   provider: string;
 
   @Column({ type: "enum", enum: UserStatus, default: UserStatus.Inactive })
   status: UserStatus;
 
   @Index()
-  @Column({ type: String, nullable: true })
+  @Column({
+    name: "numero_documento",
+    type: "varchar",
+    length: 11,
+    nullable: false,
+  })
   socialId: string | null;
 
   @Index()
-  @Column({ type: String, nullable: true })
+  @Column({ name: "nombre", type: "varchar", length: 100, nullable: false })
   firstName: string | null;
 
   @Index()
-  @Column({ type: String, nullable: true })
+  @Column({ name: "apellido", type: "varchar", length: 100, nullable: false })
   lastName: string | null;
 
-  @CreateDateColumn()
+  @Column({
+    name: "tipo_rol",
+    type: "enum",
+    enum: ["admin", "cliente", "empleado", "diseñador"],
+    default: "cliente",
+  })
+  role: string;
+
+  @Column({ name: "ultimo_acceso", type: "datetime", nullable: true })
+  lastLoginAt: Date;
+
+  @CreateDateColumn({
+    name: "fecha_creacion",
+    type: "datetime",
+    default: () => "CURRENT_TIMESTAMP",
+  })
   createdAt: Date;
 
   @Column({ type: String, nullable: true })
