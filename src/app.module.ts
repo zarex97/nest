@@ -2,6 +2,7 @@ import { Module, MiddlewareConsumer, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { APP_GUARD } from "@nestjs/core";
+import { JwtModule } from "@nestjs/jwt";
 
 // Core modules
 import { AuthModule } from "./auth/auth.module";
@@ -13,12 +14,12 @@ import { ForgotPasswordModule } from "./forgot-password/forgot-password.module";
 // Business modules
 import { ProductosModule } from "./productos/productos.module";
 import { PedidosModule } from "./pedidos/pedidos.module";
-import { CarritoModule } from "./carrito/carrito.module";
-import { ChatModule } from "./chat/chat.module";
-import { PersonalizacionModule } from "./personalizacion/personalizacion.module";
-import { FacturacionModule } from "./facturacion/facturacion.module";
+// import { CarritoModule } from "./carrito/carrito.module";
+// import { ChatModule } from "./chat/chat.module";
+// import { PersonalizacionModule } from "./personalizacion/personalizacion.module";
+// import { FacturacionModule } from "./facturacion/facturacion.module";
 import { PromocionesModule } from "./promociones/promociones.module";
-import { FavoritosModule } from "./favoritos/favoritos.module";
+// import { FavoritosModule } from "./favoritos/favoritos.module";
 
 // Guards y middlewares
 import { RolesGuard } from "./auth/guards/roles.guard";
@@ -27,17 +28,22 @@ import { SessionValidationMiddleware } from "./auth/middlewares/session-validati
 // Configuration
 import databaseConfig from "./config/database.config";
 import authConfig from "./config/auth.config";
+import appConfig from "./config/app.config";
 import { TypeOrmConfigService } from "./database/typeorm-config.service";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, authConfig],
+      load: [databaseConfig, authConfig, appConfig],
       envFilePath: [".env"],
     }),
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
+    }),
+
+    JwtModule.register({
+      global: true,
     }),
 
     // Core modules
@@ -50,12 +56,12 @@ import { TypeOrmConfigService } from "./database/typeorm-config.service";
     // Business modules
     ProductosModule,
     PedidosModule,
-    CarritoModule,
-    ChatModule,
-    PersonalizacionModule,
-    FacturacionModule,
+    // CarritoModule,
+    // ChatModule,
+    // PersonalizacionModule,
+    // FacturacionModule,
     PromocionesModule,
-    FavoritosModule,
+    // FavoritosModule,
   ],
   providers: [
     // Guard global para roles (se aplicará automáticamente después de JWT)
