@@ -21,6 +21,13 @@ export enum UserStatus {
   Inactive = "inactive",
 }
 
+export enum UserRole {
+  Admin = "admin",
+  Cliente = "cliente",
+  Empleado = "empleado",
+  Disenador = "disenador", // Sin ñ para evitar problemas de encoding
+}
+
 @Entity("usuario")
 export class User extends EntityHelper {
   @PrimaryGeneratedColumn({ name: "id_usuario" })
@@ -60,12 +67,17 @@ export class User extends EntityHelper {
   @Column({
     name: "tipo_rol",
     type: "enum",
-    enum: ["admin", "cliente", "empleado", "diseñador"],
-    default: "cliente",
+    enum: UserRole,
+    default: UserRole.Cliente,
   })
-  role: string; // You can name this 'role' in code for clarity
+  role: UserRole;
 
-  @Column({ type: "enum", enum: UserStatus, default: UserStatus.Inactive })
+  @Column({
+    name: "status",
+    type: "enum",
+    enum: UserStatus,
+    default: UserStatus.Inactive,
+  })
   status: UserStatus;
 
   @Index()
@@ -85,7 +97,6 @@ export class User extends EntityHelper {
   @Column({ name: "apellido", type: "varchar", length: 100, nullable: false })
   lastName: string | null;
 
-  //Podría ser cambiado a un string para incluir simbolos como el "+" o el "-"
   @Column({
     name: "numero_telefono",
     type: "integer",
@@ -110,4 +121,25 @@ export class User extends EntityHelper {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  // Método helper para verificar roles
+  hasRole(role: UserRole): boolean {
+    return this.role === role;
+  }
+
+  isAdmin(): boolean {
+    return this.role === UserRole.Admin;
+  }
+
+  isCliente(): boolean {
+    return this.role === UserRole.Cliente;
+  }
+
+  isEmpleado(): boolean {
+    return this.role === UserRole.Empleado;
+  }
+
+  isDisenador(): boolean {
+    return this.role === UserRole.Disenador;
+  }
 }

@@ -5,38 +5,37 @@ import {
   Patch,
   UseGuards,
   Body,
-  Inject,
   HttpStatus,
   HttpCode,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
-import { Services } from "src/utils/constants";
-import { IUsersService } from "./users"; // Interface
-import { User } from "./entities/user.entity";
+import { User, UserRole } from "./entities/user.entity";
 import { Roles } from "src/auth/decorators/roles.decorator";
 import { AuthGuard } from "@nestjs/passport";
+import { RolesGuard } from "src/auth/guards/roles.guard";
 import { ApiBearerAuth, ApiTags, ApiParam, ApiBody } from "@nestjs/swagger";
 
 @ApiTags("Users")
 @ApiBearerAuth()
-@UseGuards(AuthGuard("jwt")) // 👈 Still need JWT auth
+@UseGuards(AuthGuard("jwt"), RolesGuard) // Aplicar ambos guards
 @Controller("users")
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-  @Roles("admin") // 👈 Only admins
+
+  @Roles(UserRole.Admin) // Solo administradores
   @Get()
   async findAll(): Promise<User[]> {
     return this.usersService.findAllUsers();
   }
 
-  @Roles("admin")
+  @Roles(UserRole.Admin)
   @Get(":id")
   @ApiParam({ name: "id", type: Number, example: 1 })
   async findOne(@Param("id") id: string): Promise<User> {
     return this.usersService.findOneUser({ id: +id });
   }
 
-  @Roles("admin")
+  @Roles(UserRole.Admin)
   @Patch(":id/role")
   @HttpCode(HttpStatus.OK)
   @ApiParam({ name: "id", type: Number, example: 1 })
@@ -46,23 +45,24 @@ export class UsersController {
       properties: {
         role: {
           type: "string",
-          enum: ["admin", "cliente", "empleado", "diseñador"],
-          example: "admin",
+          enum: Object.values(UserRole),
+          example: UserRole.Admin,
         },
       },
     },
   })
   async updateRole(
     @Param("id") id: string,
-    @Body("role") role: string
+    @Body("role") role: UserRole
   ): Promise<User> {
-    if (!["admin", "cliente", "empleado", "diseñador"].includes(role)) {
+    // Validar que el rol es válido
+    if (!Object.values(UserRole).includes(role)) {
       throw new Error("Invalid role");
     }
     return this.usersService.updateUserRole(+id, role);
   }
 
-  @Roles("admin")
+  @Roles(UserRole.Admin)
   @Patch(":id/status")
   @HttpCode(HttpStatus.OK)
   @ApiParam({ name: "id", type: Number, example: 1 })

@@ -3,7 +3,8 @@ import { User } from "../../../users/entities/user.entity";
 
 export type JwtPayloadType = Pick<User, "id"> & {
   sessionId: Session["id"];
-  iat: number;
-  exp: number;
+  iat?: number;
+  exp?: number;
   role: string;
+  email: string;
 };

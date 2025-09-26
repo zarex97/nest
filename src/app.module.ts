@@ -1,47 +1,73 @@
-import { Module } from "@nestjs/common";
-import { APP_GUARD } from "@nestjs/core"; // 👈 Correct import for older versions
+import { Module, MiddlewareConsumer, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import databaseConfig from "./config/database.config";
-import { TypeOrmConfigService } from "./database/typeorm-config.service";
-import { DataSource, DataSourceOptions } from "typeorm";
-import { UsersModule } from "./users/users.module";
+import { APP_GUARD } from "@nestjs/core";
+
+// Core modules
 import { AuthModule } from "./auth/auth.module";
+import { UsersModule } from "./users/users.module";
 import { SessionModule } from "./session/session.module";
-import { MailerModule } from "./mailer/mailer.module";
 import { MailsModule } from "./mails/mails.module";
 import { ForgotPasswordModule } from "./forgot-password/forgot-password.module";
-import appConfig from "./config/app.config";
+
+// Business modules
+import { ProductosModule } from "./productos/productos.module";
+import { PedidosModule } from "./pedidos/pedidos.module";
+import { CarritoModule } from "./carrito/carrito.module";
+import { ChatModule } from "./chat/chat.module";
+import { PersonalizacionModule } from "./personalizacion/personalizacion.module";
+import { FacturacionModule } from "./facturacion/facturacion.module";
+import { PromocionesModule } from "./promociones/promociones.module";
+import { FavoritosModule } from "./favoritos/favoritos.module";
+
+// Guards y middlewares
+import { RolesGuard } from "./auth/guards/roles.guard";
+import { SessionValidationMiddleware } from "./auth/middlewares/session-validation.middleware";
+
+// Configuration
+import databaseConfig from "./config/database.config";
 import authConfig from "./config/auth.config";
-import mailerConfig from "./config/mailer.config";
-import { RolesGuard } from "./auth/guards/roles.guard"; // 👈 Import RolesGuard
+import { TypeOrmConfigService } from "./database/typeorm-config.service";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, appConfig, authConfig, mailerConfig],
+      load: [databaseConfig, authConfig],
       envFilePath: [".env"],
     }),
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
-      dataSourceFactory: async (options: DataSourceOptions) => {
-        const dataSource = await new DataSource(options).initialize();
-        return dataSource;
-      },
     }),
-    UsersModule,
+
+    // Core modules
     AuthModule,
+    UsersModule,
     SessionModule,
-    MailerModule,
     MailsModule,
     ForgotPasswordModule,
+
+    // Business modules
+    ProductosModule,
+    PedidosModule,
+    CarritoModule,
+    ChatModule,
+    PersonalizacionModule,
+    FacturacionModule,
+    PromocionesModule,
+    FavoritosModule,
   ],
   providers: [
+    // Guard global para roles (se aplicará automáticamente después de JWT)
     {
-      provide: APP_GUARD, // 👈 Register globally
+      provide: APP_GUARD,
       useClass: RolesGuard,
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Aplicar middleware de validación de sesión a todas las rutas
+    consumer.apply(SessionValidationMiddleware).forRoutes("*");
+  }
+}

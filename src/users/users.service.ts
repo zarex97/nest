@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { DeepPartial, Repository } from "typeorm";
-import { User, UserStatus } from "./entities/user.entity";
+import { User, UserStatus, UserRole } from "./entities/user.entity"; // Import UserRole
 import { InjectRepository } from "@nestjs/typeorm";
 import { CreateUserDto } from "./dtos/create-user.dto";
 import { EntityCondition } from "src/utils/types/entity-condition.type";
@@ -31,7 +31,7 @@ export class UsersService implements IUsersService {
 
     return this.usersRepository.findOne({
       where: where.map((condition) => ({
-        email: condition.email, // 👈 Explicitly map email
+        email: condition.email,
         id: condition.id,
         hash: condition.hash,
         // Add other fields as needed
@@ -53,14 +53,16 @@ export class UsersService implements IUsersService {
       },
     });
   }
+
   async findAllUsers(): Promise<User[]> {
     return this.usersRepository.find();
   }
 
-  async updateUserRole(id: number, role: string): Promise<User> {
+  // Fix: Change parameter type from string to UserRole
+  async updateUserRole(id: number, role: UserRole): Promise<User> {
     const user = await this.usersRepository.findOneBy({ id });
     if (!user) {
-      throw new Error("User not found");
+      throw new HttpException("User not found", HttpStatus.NOT_FOUND);
     }
     user.role = role;
     return this.usersRepository.save(user);
@@ -72,7 +74,7 @@ export class UsersService implements IUsersService {
   ): Promise<User> {
     const user = await this.usersRepository.findOneBy({ id });
     if (!user) {
-      throw new Error("User not found");
+      throw new HttpException("User not found", HttpStatus.NOT_FOUND);
     }
     user.status = status === "active" ? UserStatus.Active : UserStatus.Inactive;
     return this.usersRepository.save(user);
