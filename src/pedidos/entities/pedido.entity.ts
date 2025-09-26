@@ -112,15 +112,10 @@ export class Pedido {
   })
   sena: number;
 
-  @Column({
-    name: "saldo_pendiente",
-    type: "decimal",
-    precision: 10,
-    scale: 2,
-    generatedType: "STORED",
-    asExpression: "total - sena",
-  })
-  saldoPendiente: number;
+  // Método helper para obtener saldo pendiente (calculado en tiempo real)
+  getSaldoPendiente(): number {
+    return this.total - this.sena;
+  }
 
   @Column({
     name: "direccion_retiro",
@@ -175,7 +170,13 @@ export class Pedido {
   })
   empleadoAtencionId: number;
 
-  @UpdateDateColumn()
+  @Column({
+    name: "fechaActualizacion",
+    type: "datetime",
+    precision: 6,
+    default: () => "CURRENT_TIMESTAMP(6)",
+    onUpdate: "CURRENT_TIMESTAMP(6)",
+  })
   fechaActualizacion: Date;
 
   // Relaciones
@@ -237,10 +238,6 @@ export class Pedido {
     this.subtotal = subtotalCalculado - this.descuento;
     this.impuestos = this.subtotal * 0.19; // IVA colombiano
     this.total = this.subtotal + this.impuestos;
-  }
-
-  getSaldoPendiente(): number {
-    return this.total - this.sena;
   }
 
   getTiempoRestante(): number {

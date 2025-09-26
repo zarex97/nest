@@ -1,4 +1,3 @@
-// detalle-pedido.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
